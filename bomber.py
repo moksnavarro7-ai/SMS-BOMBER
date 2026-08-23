@@ -27,6 +27,69 @@ import threading
 import warnings
 import urllib3
 
+# ============================================================
+# FLASK WEB SERVER FOR UPTIME ROBOT
+# ============================================================
+from flask import Flask, jsonify
+
+flask_app = Flask(__name__)
+
+@flask_app.route('/')
+def home():
+    return """
+    <html>
+        <head>
+            <title>Yoroda SMS Bomber Bot</title>
+            <style>
+                body { font-family: Arial; text-align: center; padding: 50px; background: #0a0a0a; color: #00ff00; }
+                h1 { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+                .status { font-size: 24px; margin: 20px 0; }
+                .green { color: #00ff00; }
+                .info { color: #ffffff; font-size: 16px; }
+                .container { background: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #00ff00; max-width: 600px; margin: 0 auto; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🚀 YORODA SMS BOMBER</h1>
+                <div class="status green">✅ Bot is RUNNING</div>
+                <div class="info">📱 Services: 10 Active</div>
+                <div class="info">⚡ Mode: Unlimited</div>
+                <div class="info">👤 Author: Yoroda Hamada</div>
+                <div class="info" style="margin-top:20px;font-size:14px;color:#888;">
+                    Uptime Robot Monitor Active
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+
+@flask_app.route('/health')
+def health():
+    return jsonify({
+        "status": "ok",
+        "bot": "running",
+        "services": 10,
+        "mode": "unlimited",
+        "timestamp": time.time()
+    })
+
+@flask_app.route('/status')
+def status():
+    return jsonify({
+        "status": "running" if bot.bomber.is_running else "idle",
+        "target": bot.bomber.current_target or "None",
+        "success": bot.bomber.success_count,
+        "failed": bot.bomber.fail_count,
+        "total": bot.bomber.total_attempts,
+        "services": len(bot.bomber.services)
+    })
+
+def run_web_server():
+    """Run Flask web server for Uptime Robot"""
+    port = int(os.environ.get('PORT', 10000))
+    flask_app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+
 # DISABLE WARNINGS
 warnings.filterwarnings('ignore')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -1018,6 +1081,11 @@ def main():
     =================================
     """)
     
+    # Start Flask web server for Uptime Robot
+    web_thread = threading.Thread(target=run_web_server, daemon=True)
+    web_thread.start()
+    print("✅ Web server started for Uptime Robot monitoring")
+    
     # Fix for Python 3.14 - ensure event loop exists
     if sys.version_info >= (3, 14):
         try:
@@ -1042,9 +1110,9 @@ def main():
     # Callback query handler
     app.add_handler(CallbackQueryHandler(button_handler))
     
-    print("Bot is ready! Press Ctrl+C to stop.")
+    print("🤖 Bot is ready! Press Ctrl+C to stop.")
+    print(f"🌐 Web server running on port {os.environ.get('PORT', 10000)}")
     
-    # Fix for Python 3.14 - ensure event loop before running polling
     if sys.version_info >= (3, 14):
         try:
             loop = asyncio.get_running_loop()
