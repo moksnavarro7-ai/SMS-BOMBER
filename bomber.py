@@ -1094,6 +1094,7 @@ def main():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
     
+    # Build application
     app = Application.builder().token(BOT_TOKEN).build()
     
     # Command handlers
@@ -1113,13 +1114,7 @@ def main():
     print("🤖 Bot is ready! Press Ctrl+C to stop.")
     print(f"🌐 Web server running on port {os.environ.get('PORT', 10000)}")
     
-    if sys.version_info >= (3, 14):
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-    
+    # Start polling
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
