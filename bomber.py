@@ -1,4 +1,16 @@
 import asyncio
+import sys
+
+# ============================================================
+# FIX FOR PYTHON 3.14 EVENT LOOP ISSUE
+# ============================================================
+if sys.version_info >= (3, 14):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
 import re
 import random
 import string
@@ -1006,6 +1018,14 @@ def main():
     =================================
     """)
     
+    # Fix for Python 3.14 - ensure event loop exists
+    if sys.version_info >= (3, 14):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
     app = Application.builder().token(BOT_TOKEN).build()
     
     # Command handlers
@@ -1023,6 +1043,15 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
     
     print("Bot is ready! Press Ctrl+C to stop.")
+    
+    # Fix for Python 3.14 - ensure event loop before running polling
+    if sys.version_info >= (3, 14):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
